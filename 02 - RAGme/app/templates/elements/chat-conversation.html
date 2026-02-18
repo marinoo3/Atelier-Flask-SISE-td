@@ -1,0 +1,19 @@
+<div class="chat-conversation {% if not messages %}empty{% endif %}">
+    <div class="default">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="" height="84px">
+        <h1>Allons-y ! Qu'avez-vous en tête ?</h1>
+        <p class="second">Interrogez vos sources en temps réel pour générer des réponses contextualisées et pertinentes.</p>
+    </div>
+    <ul class="messages markdown-body">
+        {% for message in messages %}
+            <li class="{{ message.role }} history">{{ message.content|safe }}</li>
+        {% endfor %}
+    </ul>
+    <form class="entry" autocomplete="off">
+        <input type="text" name="session_id" value="{{ id }}" hidden>
+        <input type="text" name="query" id="query" placeholder="Posez une question" autocomplete="off">
+        <button class="icon-second-button">
+            <img src="{{ url_for('static', filename='images/send.svg') }}" alt="" height="16px">
+        </button>
+    </form>
+</div>

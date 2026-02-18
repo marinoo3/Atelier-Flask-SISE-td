@@ -1,0 +1,16 @@
+[project]
+name = "atelier-flask-sise"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "chromadb>=1.5.0",
+    "flask>=3.1.2",
+    "markdown>=3.10.2",
+    "mistralai>=1.12.2",
+    "pydantic>=2.12.5",
+    "pypdf>=6.7.0",
+    "sentence-transformers>=5.2.2",
+    "sqlalchemy>=2.0.46",
+]

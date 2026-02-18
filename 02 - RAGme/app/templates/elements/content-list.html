@@ -1,0 +1,15 @@
+<div class="content-list">
+    <h2>{{ title }}</h2>
+    <ul class="elements">
+        {% for element in content %}
+            <li data-id="{{ element.id }}">
+                <img src="{{ element_icon }}" alt="" height="16px">
+                <p>{{ element.name }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+    <button class="icon-button">
+        <img src="{{ button_icon }}" alt="" height="16px">
+        <p>{{ button_text }}</p>
+    </button>
+</div>
