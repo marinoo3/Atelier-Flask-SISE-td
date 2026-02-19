@@ -1,19 +1,15 @@
-from typing import Optional
-from pydantic import BaseModel, computed_field
-
 from io import BytesIO
+from typing import Optional
 
+from pydantic import BaseModel, computed_field
 
 
 class DocumentSchema(BaseModel):
-    model_config = {"from_attributes": True}
+    # TODO: Configurer le model_config pour la génération via SQLAlchemy
 
-    id: int  # sqlite3 ids
-    title: str
-    binary: bytes  # content as a pdf blop
-    category: Optional[str] = None
-    url: Optional[str] = None
+    # TODO: Créer les champs correspondants au modèle de données Document
 
+    # -------------------------------------------- Computed fields for ChromaDB integration --------------------------------------------
     @computed_field
     @property
     def chroma_metadata(self) -> dict:
@@ -31,7 +27,7 @@ class DocumentSchema(BaseModel):
     def chroma_id(self) -> str:
         """Generate a unique ChromaDB ID for the document."""
         return f"document_{self.id}"
-    
+
     def convert_blob(self) -> BytesIO:
         """Convert binary data to a blob"""
         return BytesIO(self.binary)
