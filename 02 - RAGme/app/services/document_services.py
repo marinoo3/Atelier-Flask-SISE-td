@@ -63,15 +63,8 @@ class DocumentService:
             ...     print(doc.titre)
         """
 
-        results = list()
-
-        with self.db_manager.session() as session:
-            documents = session.query(Document).all()
-
-            for document in documents:
-                results.append(DocumentSchema.model_validate(document))
-
-        return results
+        # TODO: Implémenter la fonction get_all
+        ...
 
     def get_by_id(self, document_id: int) -> DocumentSchema:
         """
@@ -82,23 +75,17 @@ class DocumentService:
 
         Returns:
             DocumentSchema: The Document if found, None otherwise.
+        Raises:
+            ValueError: If no document is found with the given ID.
 
         Example:
             >>> doc = service.get_by_id(1)
             >>> if doc:
             ...     print(doc.titre)
         """
-        with self.db_manager.session() as session:
-            document = session.query(Document).filter_by(id=document_id).first()
 
-            document_schema = (
-                DocumentSchema.model_validate(document) if document else None
-            )
-
-            if not document_schema:
-                raise ValueError(f"Document with id={document_id} not found.")
-
-            return document_schema
+        # TODO : Implémenter la fonction get_by_id
+        ...
 
     ################################################################
     # CREATE METHODS
@@ -111,7 +98,7 @@ class DocumentService:
         url: Optional[str] = None,
     ) -> DocumentSchema:
         """
-        Create a new document record.
+        Create a new document record and synchronize the chromadb.
 
         Args:
             title (str): The document title
@@ -123,17 +110,17 @@ class DocumentService:
         Returns:
             DocumentSchema: The newly created Document record
         """
-        with self.db_manager.session() as session:
-            document = Document(title=title, binary=binary, category=category, url=url)
 
-            session.add(document)
-            session.commit()
-            session.flush()
+        # TODO: Implémenter la fonction create
+        with ...:
+            # TODO: Générer le schema
+            document_schema = ...
 
-            document_schema = DocumentSchema.model_validate(document)
+            # TODO: Implémenter la création d'un document dans la base de données
+            ...
 
-            # Parse the pdf blob to add and chunk for the vector store if no text_content is provided
-            text_content = self.pdf_handler.read_pdf_from_bytes(document_schema.binary)
+            # Insert in vector store
+            text_content = self.pdf_handler.read_pdf_from_bytes(binary)
 
             # add to vector store
             document_store.add(
@@ -142,7 +129,7 @@ class DocumentService:
                 metadata=document_schema.chroma_metadata,
             )
 
-            return document_schema
+            return ...
 
     def create_from_pdf_folder(self, folder_path: Path) -> List[DocumentSchema]:
         """Function to create new documents from all pdfs in a folder.
@@ -204,81 +191,3 @@ class DocumentService:
             raise ValueError("No valid PDF files found in the folder.")
 
         return documents
-
-    ################################################################
-    # UPDATE METHODS
-    ################################################################
-
-    def update_document(
-        self,
-        document_id: int,
-        title: str,
-        binary: bytes,
-        category: Optional[str],
-        url: str,
-    ) -> DocumentSchema:
-        """Update an existing document with new information.
-
-        Args:
-            document_id (int): The unique identifier of the document to update.
-            title (str): The new title for the document.
-            binary (bytes): The new binary content for the document.
-            category (Optional[str]): The new category for the document.
-            url (str): The new URL for the document.
-
-        Returns:
-            DocumentSchema: The updated Document record.
-        """
-
-        # get the text content from the new binary
-        text_content = self.pdf_handler.read_pdf_from_bytes(binary)
-
-        with self.db_manager.session() as session:
-            document = session.query(Document).filter_by(id=document_id).first()
-            if not document:
-                raise ValueError(f"Document with id={document_id} not found.")
-
-            document.title = title
-            document.binary = binary
-            document.category = category
-            document.url = url
-            session.commit()
-            session.flush()
-
-            document_schema = DocumentSchema.model_validate(document)
-
-            # update in chroma_db
-            document_store.add(
-                item_id=document_schema.chroma_id,
-                content=text_content,
-                metadata=document_schema.chroma_metadata,
-            )
-
-            return document_schema
-
-    ################################################################
-    # DELETE METHODS
-    ################################################################
-    def delete(self, document_id: int) -> bool:
-        """
-        Delete a document by ID.
-
-        Args:
-            document_id (int): The document's unique identifier.
-
-        Returns:
-            bool: True if deleted, False if document not found.
-
-        Example:
-            >>> deleted = service.delete(1)
-        """
-        with self.db_manager.session() as session:
-            document = session.query(Document).filter_by(id=document_id).first()
-            if document:
-                session.delete(document)
-                session.commit()
-
-                # delete from chroma_db
-                document_store.delete(where={"document_id": document.id})
-                return True
-            return False
