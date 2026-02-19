@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>RAGme</title>
+   <!-- Markdown Style -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown-light.min.css">
+   <!-- Custom Style -->
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/_components.css') }}">
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+   <!-- <link rel="icon" href="./favicon.ico" type="image/x-icon"> -->
+</head>
+
+<body>
+    <nav>
+        <img src="{{ url_for('static', filename='images/full-logo.svg') }}" alt="" height="42px">
+        <a href="" class="selected">Chat</a>
+        <a href="/settings">Réglages</a>
+        <a href="/account">Compte</a>
+    </nav>
+   <main>
+      <div class="section" id="conversations">hello</div>
+      <div class="section" id="documents">hello</div>
+      <div class="section" id="chat">
+         <ul class="header"></ul>
+         <div class="conv"></div>
+      </div>
+   </main>
+</body>
+
+<script src="{{ url_for('static', filename='js/chat.js') }}" type="module"></script>
+
+</html>
