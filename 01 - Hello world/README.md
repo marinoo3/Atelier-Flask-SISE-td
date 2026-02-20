@@ -23,7 +23,7 @@ uv init
 Puis ajoutez les dépendances nécessaires :
 
 ```bash
-uv add flask flask-sqlalchemy
+uv add flask sqlalchemy
 ```
 
 Synchronisez les dépendances :
@@ -51,24 +51,28 @@ Votre application doit contenir :
 #### Configuration de Flask et SQLAlchemy
 
 - Importer les modules nécessaires : `Flask`, `render_template`, `request`, `redirect`, `url_for` depuis flask
-- Importer `SQLAlchemy` depuis flask_sqlalchemy
+- Importer `create_engine`, `Column`, `Integer`, `String` depuis sqlalchemy
+- Importer `declarative_base`, `sessionmaker` depuis sqlalchemy.orm
 - Configurer l'application Flask
-- Configurer SQLAlchemy avec une base de données SQLite nommée `movies.db`
-- Désactiver le tracking des modifications (`SQLALCHEMY_TRACK_MODIFICATIONS = False`)
+- Créer un engine SQLAlchemy avec une base de données SQLite nommée `movies.db` dans le dossier instance
+- Créer une Base déclarative et un sessionmaker
 
 #### Modèle de données
 
-Créer un modèle `Movie` avec :
+Créer un modèle `Movie` héritant de `Base` avec :
 
-- Un champ `id` (entier, clé primaire)
-- Un champ `title` (chaîne de caractères, 200 max, non nullable)
+- Un attribut `__tablename__` défini à `"movies"`
+- Un champ `id` (Column Integer, clé primaire)
+- Un champ `title` (Column String 200, non nullable)
 
 #### Route principale
 
 Créer une route `/` qui accepte les méthodes GET et POST :
 
-- **GET** : Récupère tous les films de la base de données et affiche la page
-- **POST** : Récupère le titre du film depuis le formulaire, l'ajoute à la base de données, puis redirige vers la page d'accueil
+- Créer une session SQLAlchemy au début de la fonction
+- Utiliser un bloc try/finally pour garantir la fermeture de la session
+- **GET** : Récupère tous les films avec `session.query(Movie).all()` et affiche la page
+- **POST** : Récupère le titre du film depuis le formulaire, l'ajoute à la session avec `session.add()`, commit, puis redirige vers la page d'accueil
 
 #### Lancement de l'application
 
@@ -141,20 +145,25 @@ Accédez ensuite à `http://127.0.0.1:5000` dans votre navigateur.
 
 ```python
 from flask import Flask, render_template, request, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///nom_base.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+
+# Configuration SQLAlchemy
+engine = create_engine('sqlite:///instance/nom_base.db', echo=False)
+Base = declarative_base()
+Session = sessionmaker(bind=engine)
 ```
 
 ### SQLAlchemy - Définition d'un modèle
 
 ```python
-class NomModele(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    champ_texte = db.Column(db.String(200), nullable=False)
+class NomModele(Base):
+    __tablename__ = 'nom_table'
+
+    id = Column(Integer, primary_key=True)
+    champ_texte = Column(String(200), nullable=False)
 
     def __repr__(self):
         return f'<NomModele {self.champ_texte}>'
@@ -163,19 +172,24 @@ class NomModele(db.Model):
 ### SQLAlchemy - Opérations sur la base de données
 
 ```python
+# Créer une session
+session = Session()
+
 # Récupérer tous les éléments
-elements = NomModele.query.all()
+elements = session.query(NomModele).all()
 
 # Créer un nouvel élément
 nouvel_element = NomModele(champ_texte="valeur")
 
 # Ajouter et enregistrer en base
-db.session.add(nouvel_element)
-db.session.commit()
+session.add(nouvel_element)
+session.commit()
+
+# Fermer la session
+session.close()
 
 # Créer les tables au démarrage
-with app.app_context():
-    db.create_all()
+Base.metadata.create_all(engine)
 ```
 
 ### Flask - Routes et méthodes HTTP
@@ -183,22 +197,26 @@ with app.app_context():
 ```python
 @app.route('/', methods=['GET', 'POST'])
 def nom_fonction():
-    if request.method == 'POST':
-        # Traiter le formulaire
-        valeur = request.form.get('nom_champ')
-        # ... faire quelque chose ...
-        return redirect(url_for('nom_fonction'))
+    session = Session()
+    try:
+        if request.method == 'POST':
+            # Traiter le formulaire
+            valeur = request.form.get('nom_champ')
+            # ... faire quelque chose ...
+            session.commit()
+            return redirect(url_for('nom_fonction'))
 
-    # Méthode GET - afficher la page
-    return render_template('fichier.html', variable=valeur)
+        # Méthode GET - afficher la page
+        return render_template('fichier.html', variable=valeur)
+    finally:
+        session.close()
 ```
 
 ### Flask - Lancer l'application
 
 ```python
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
+    Base.metadata.create_all(engine)
     app.run(debug=True)
 ```
 
