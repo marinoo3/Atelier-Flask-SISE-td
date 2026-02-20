@@ -75,6 +75,7 @@ Dans le fichier `document.py`:
 #### Fichier `app/models/__init__.py`
 
 Dans le fichier initialisateur du module, exposez la classe Document:
+
 4. Importez du fichier `document.py` la classe Document.
 5. paramétrez l'attribut `__all__` pour exposer la classe. 
 
