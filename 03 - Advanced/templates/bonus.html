@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Bonus - Request Tester</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bonus.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div style="flex: 1;">
+                <h1>🧪 Flask Bonus - Request Tester</h1>
+                <p class="subtitle">Test interface to experiment with Flask</p>
+            </div>
+            {% if session.user_id %}
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="background: #e0e7ff; color: #3730a3; padding: 8px 16px; border-radius: 20px; font-weight: 600;">
+                    👤 {{ session.username }}
+                </span>
+                <a href="/dashboard" style="background: #2563eb; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+                    📊 Dashboard
+                </a>
+                <a href="/auth/logout" style="background: #ef4444; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+                    Logout
+                </a>
+            </div>
+            {% else %}
+            <div style="display: flex; gap: 10px;">
+                <a href="/auth/login" style="background: #2563eb; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+                    🔐 Login
+                </a>
+                <a href="/auth/register" style="background: #10b981; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+                    ✨ Register
+                </a>
+            </div>
+            {% endif %}
+        </header>
+
+        <!-- API Key Banner -->
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-bottom: 3px solid #3b82f6; padding: 20px 40px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="flex: 1;">
+                    <label for="apiKeyInput" style="display: block; color: #1e40af; font-weight: 700; margin-bottom: 8px; font-size: 0.95rem;">
+                        🔑 API Key (Optional - 5 free requests without key, unlimited with key)
+                    </label>
+                    <input type="text" id="apiKeyInput" placeholder="bonus_your_api_key_here or leave empty for 5 free requests" 
+                           style="width: 100%; padding: 12px 16px; border: 2px solid #93c5fd; border-radius: 8px; font-family: monospace; font-size: 0.9rem; background: white;">
+                </div>
+                <div style="padding-top: 28px;">
+                    <button onclick="clearApiKey()" style="background: #fee2e2; color: #991b1b; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s;">
+                        Clear Key
+                    </button>
+                </div>
+            </div>
+            <p style="color: #475569; font-size: 0.85rem; margin-top: 10px; margin-bottom: 0;">
+                💡 <strong>Tip:</strong> Get your API key from the <a href="/dashboard" style="color: #2563eb; text-decoration: underline;">Dashboard</a> after creating an account
+            </p>
+        </div>
+
+        <div class="main-content">
+            <!-- Sidebar with available requests list -->
+            <aside class="sidebar">
+                <h2>📋 Available Requests</h2>
+                <div id="routesListContainer" class="routes-list">
+                    <div class="loading-state">
+                        <p>⏳ Loading routes...</p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main area for testing requests -->
+            <main class="content">
+                <div class="test-panel">
+                    <div class="panel-header">
+                        <h2>🔧 Request Tester</h2>
+                        <button id="clearBtn" class="btn btn-secondary">Clear</button>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="form-row">
+                            <label for="methodSelect">HTTP Method:</label>
+                            <select id="methodSelect" class="input">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                                <option value="PUT">PUT</option>
+                                <option value="DELETE">DELETE</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <label for="urlInput">URL:</label>
+                            <input type="text" id="urlInput" class="input" placeholder="/api/get-user/123" value="">
+                        </div>
+
+                        <div id="paramsListContainer" class="params-list" style="display: none;">
+                            <h3>📋 Request Parameters</h3>
+                            <div id="paramsList"></div>
+                        </div>
+
+                        <div class="form-row">
+                            <label for="paramsInput">URL Parameters (Query String):</label>
+                            <textarea id="paramsInput" class="input textarea" rows="3" placeholder='name=John&age=25'></textarea>
+                            <small>Format: name=value&other=value</small>
+                        </div>
+
+                        <div class="form-row">
+                            <label for="bodyInput">Request Body (JSON):</label>
+                            <textarea id="bodyInput" class="input textarea" rows="6" placeholder='{
+  "message": "Hello",
+  "number": 42
+}'></textarea>
+                            <small>JSON format only</small>
+                        </div>
+
+                        <button id="sendBtn" class="btn btn-primary">
+                            <span id="sendBtnText">🚀 Send Request</span>
+                            <span id="sendBtnLoader" class="loader" style="display: none;">⏳ Sending...</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="response-panel">
+                    <h2>📨 Response</h2>
+                    <div id="responseContainer" class="response-content">
+                        <div class="empty-state">
+                            <p>No request sent yet</p>
+                            <p class="hint">Select a request from the list or configure one manually</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <footer class="footer">
+            <p>💡 Tip: Click on a request in the list to load it automatically</p>
+        </footer>
+    </div>
+
+    <script>
+        function clearApiKey() {
+            document.getElementById('apiKeyInput').value = '';
+        }
+    </script>
+    <script src="{{ url_for('static', filename='bonus.js') }}"></script>
+</body>
+</html>
