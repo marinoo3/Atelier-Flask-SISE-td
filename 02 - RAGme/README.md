@@ -14,14 +14,14 @@ Créer une application dynamique avec Flask, structurée en services, utilisant 
 #### Environnement
 
 1. Se déplacer dans le répertoire `02 - RAGme`
-3. Synchroniser les dépendances avec `uv`
+2. Synchroniser les dépendances avec `uv`
 3. Activer l'environnement
 
 #### Fichier `.env`
 
-1. Dupliquer le fichier `.env-example` et le nommer `.env`
-2. Renseigner une clé API Mistral
-3. Lancer l'app et accéder son URL dans un navigateur internet 
+4. Dupliquer le fichier `.env-example` et le nommer `.env`
+5. Renseigner une clé API Mistral
+6. Lancer l'app et accéder son URL dans un navigateur internet 
 ```bash
 python run.py
 ```
@@ -52,7 +52,7 @@ Afin de préparer le modèle *SQLAlchemy* permettant de générer l'**O**bject *
 
 #### Fichier `app/models/document.py`
 Dans le fichier `document.py`: 
-1. Importez l'objet `Base` précédemment créé
+2. Importez l'objet `Base` précédemment créé
 2. Créez la classe `Document`: le modèle de document de la base de donnée.
     a. Elle doit hériter de `Base` afin d'enregistrer la classe dans l'ORM.
     b. Nommez la table `documents`
@@ -68,8 +68,8 @@ Dans le fichier `document.py`:
     
 #### Fichier `app/models/__init__.py`
 Dans le fichier initialisateur du module, exposez la classe Document:
-1. Importez du fichier `document.py` la classe Document.
-2. paramétrez l'attribut `__all__` pour exposer la classe. 
+4. Importez du fichier `document.py` la classe Document.
+5. paramétrez l'attribut `__all__` pour exposer la classe. 
 
 > 💡https://medium.com/@akshatgadodia/demystifying-all-in-python-a-closer-look-at-module-exports-f4d818a12bb6
 
@@ -85,12 +85,12 @@ Les modèles sont prêts; il faut à présent paramétrer la base de donnée ell
 #### Fichier `app/database/sql_db.py`
 
 
-1. Importez l'objet `Base` contenant toutes les métadonnées des modèles SQLAlchemy. 
-2. Complétez la propriété `engine`: il faut créer le moteur SQLAlchemy permettant la connection à la base de donnée locale et l'enregistrer dans l'attribut `self._engine`.
+6. Importez l'objet `Base` contenant toutes les métadonnées des modèles SQLAlchemy. 
+7. Complétez la propriété `engine`: il faut créer le moteur SQLAlchemy permettant la connection à la base de donnée locale et l'enregistrer dans l'attribut `self._engine`.
     - Utilisez une `f_string` pour insérer dynamiquement l'attribut `self.db_path` 
-2. Compléter la méthode `session` pour instancier un `sessionmaker()`: associez la `factory` à l'engine de la classe `self._engine`
+8. Compléter la méthode `session` pour instancier un `sessionmaker()`: associez la `factory` à l'engine de la classe `self._engine`
 
-3. Compléter la méthode `init_db` pour permettre la création de la base de donnée
+9. Compléter la méthode `init_db` pour permettre la création de la base de donnée
 
 > 💡Besoin d'aide ? https://docs.sqlalchemy.org/en/21/orm/session_basics.html
 
@@ -103,8 +103,8 @@ L'ORM est paramétré, et la base de donnée configurée. Lors de l'interaction 
 
 > ⚠️`Pydantic` permet une communication efficace entre les objets de l'ORM et la récupération de données; il faut bien veiller à avoir une correspondance parfaite entre le `model` et le `schema`.
 
-1. Créer la classe `DocumentSchema`, qui doit présenter une parfaite symmétrie avec le `model` précédemment codé.
-2. Configurer l'attribut `model_config` pour permettre une génération de l'objet directement via les attributs d'un autre objet (dans notre cas, les attributs de notre `model`)
+10. Créer la classe `DocumentSchema`, qui doit présenter une parfaite symmétrie avec le `model` précédemment codé.
+11. Configurer l'attribut `model_config` pour permettre une génération de l'objet directement via les attributs d'un autre objet (dans notre cas, les attributs de notre `model`)
 
 > 💡Pour vous aider: https://docs.pydantic.dev/latest/#pydantic-examples
 
@@ -115,16 +115,16 @@ Il est maintenant temps d'exploiter notre entrepôt de données ! Le fichier `do
 
 #### Fichier `app/schemas/document_schema.py`
 
-1. Implémenter la méthode `get_all()`
+12. Implémenter la méthode `get_all()`
     a. La méthode doit retourner une liste de tous les documents présent en base de donnée. 
     b. Les données doivent être générées dans l'objet `DocumentSchema` pydantic (il est possible de créé l'objet pydantic attribut par attribut, mais peut être que la méthode `model_validate()` peut vous aider)
     
 
-2. Implémenter la méthode `get_by_id()`
+13. Implémenter la méthode `get_by_id()`
     a. La méthode doit renvoyer un unique `DocumentSchema`
     b. La méthode doit lever une erreur si l'id ne correspond à aucun document.
     
-3. Implémenter la méthode `create()`
+14. Implémenter la méthode `create()`
     a. La méthode doit pouvoir créer une nouvelle entrée dans la table à partir d'un fichier pdf.
     b. la méthode doit renvoyer un `DocumentSchema` représentant la nouvelle entrée après insertion.
     c. La synchronisation avec la chroma_db (pour la recherche vectorielle) est déjà implémentée.
@@ -141,10 +141,10 @@ Avant toute chose, il nous faut instancier nos services et initialiser notre bas
 
 #### Fichier `app/__init__.py`
 
-1. Importer l'objet `db` de notre base de données SQLite
-2. Importer nos deux services `RagService` et `DocumentService`
-3. Appeler la méthode `init_db` après avoir créé l'app dans la méthode `create_app()`
-4. Nous voulons instancier nos services dans le contexte de l'application Flask, pour que ceux-ci puissent être utilisés depuis l'AJAX.
+3. Importer l'objet `db` de notre base de données SQLite
+4. Importer nos deux services `RagService` et `DocumentService`
+5. Appeler la méthode `init_db` après avoir créé l'app dans la méthode `create_app()`
+6. Nous voulons instancier nos services dans le contexte de l'application Flask, pour que ceux-ci puissent être utilisés depuis l'AJAX.
     a. Créer une instance pour chaque service dans `app.app_context()`.
     b. Corriger le typage en définissant le type de ces instances dans la classe `AppContext`.
     
@@ -156,27 +156,27 @@ Nous allons créer dans le fichier ajax des endpoints sous forme de fonctions. C
 
 Commençons par implémenter le bloc "conversations". Le endpoint `render_conversations` doit retourner le bloc de conversations. C'est une liste des conversations enregistrées dans l'app.
 
-1. Créer un endpoint `GET` à l'adresse `render_conversations` :
+7. Créer un endpoint `GET` à l'adresse `render_conversations` :
 ```python
 @ajax.route('render_conversations', methods=['GET'])
 def render_conversations():
     ...
 ```
-2. Utiliser le `RagService` du contexte de l'application pour récupérer la liste de toutes les sessions LLM. _Le `llm_handler` permet de gérer la création et la récupération des sessions._
-3. Créer une liste `session_content` qui contient un dictionnaire pour chacune des sessions avec les clés :
+8. Utiliser le `RagService` du contexte de l'application pour récupérer la liste de toutes les sessions LLM. _Le `llm_handler` permet de gérer la création et la récupération des sessions._
+9. Créer une liste `session_content` qui contient un dictionnaire pour chacune des sessions avec les clés :
 ```json
 name: session.name
 id: session.id
 ```
-4. Aller voir la template `content-list.html` dans `app/templates/elements/` et observer les variables. Il y en a 5, sans compter les éléments de la liste.
-5. Renvoyer cette template depuis le endpoint, en lui passant les variables nécessaires. _Vous retrouverez les icônes disponibles dans le dossier `app/static/images/`. Utiliser [url_for](https://flask.palletsprojects.com/en/stable/tutorial/static/) pour passer le lien des icônes_
+10. Aller voir la template `content-list.html` dans `app/templates/elements/` et observer les variables. Il y en a 5, sans compter les éléments de la liste.
+11. Renvoyer cette template depuis le endpoint, en lui passant les variables nécessaires. _Vous retrouverez les icônes disponibles dans le dossier `app/static/images/`. Utiliser [url_for](https://flask.palletsprojects.com/en/stable/tutorial/static/) pour passer le lien des icônes_
 
 #### Fichier `app/static/js/chat.js`
 
 Ce script contient la logique de notre interface, c'est lui qui requête nos endpoints AJAX. 
 
-1. Regarder la fonction `renderConversations()`, elle fait une requête au endpoint que nous venons de créer et crée le bloc de conversations depuis le HTML renvoyé.
-2. En bas du script, ajouter un event listener sur l'événement [DOMContentLoaded](https://developer.mozilla.org/en-US/docs/Web/API/Document/DOMContentLoaded_event). Cet événement est déclenché lorsque la page finit de charger. Appeler la fonction `renderConversations()` dans cet event listener.
+12. Regarder la fonction `renderConversations()`, elle fait une requête au endpoint que nous venons de créer et crée le bloc de conversations depuis le HTML renvoyé.
+13. En bas du script, ajouter un event listener sur l'événement [DOMContentLoaded](https://developer.mozilla.org/en-US/docs/Web/API/Document/DOMContentLoaded_event). Cet événement est déclenché lorsque la page finit de charger. Appeler la fonction `renderConversations()` dans cet event listener.
 
 Recharger la page sur votre navigateur et vérifier que le bloc de conversation s'affiche correctement.
 > 💡 Nous travaillons avec deux langages et avons donc deux consoles. La première est notre terminal Python, que nous connaissons bien. La deuxième est le devtool, c'est la console JS intégrée à votre navigateur. Faites `Clic droit > Inspecter` et trouvez l'onglet `Console` pour y accéder.
@@ -193,10 +193,10 @@ Il faut implémenter le chargement des conversations (pour l'instant, rien ne se
 
 #### Fichier `app/ajax.py`
 
-1. Créer un [endpoint dynamique](https://codesignal.com/learn/courses/introduction-to-flask-basics/lessons/using-path-parameters-in-dynamic-routes) `render_session/<session_id>`. Ici nous avons un paramètre dans le chemin de l'URL qui définit l'ID de la session à renvoyer.
-2. Récupérer la session correspondant à l'ID depuis le `llm_handler`
-3. Aller voir les templates `chat-tab.html` et `chat-conversation.html`. La première prend l'id et le nom de la session comme arguments, la deuxième prend l'id de session et la liste de messages.
-4. Renvoyer un JSON contenant les deux templates, avec les clés `tab` et `conversation` :
+14. Créer un [endpoint dynamique](https://codesignal.com/learn/courses/introduction-to-flask-basics/lessons/using-path-parameters-in-dynamic-routes) `render_session/<session_id>`. Ici nous avons un paramètre dans le chemin de l'URL qui définit l'ID de la session à renvoyer.
+15. Récupérer la session correspondant à l'ID depuis le `llm_handler`
+16. Aller voir les templates `chat-tab.html` et `chat-conversation.html`. La première prend l'id et le nom de la session comme arguments, la deuxième prend l'id de session et la liste de messages.
+17. Renvoyer un JSON contenant les deux templates, avec les clés `tab` et `conversation` :
     ```json
     tab: chat-tab (HTML)
     conversation: chat-conversation (HTML)
@@ -205,8 +205,8 @@ Il faut implémenter le chargement des conversations (pour l'instant, rien ne se
 
 #### Fichier `app/static/js/chat.js`
 
-1. Retourner dans la fonction `renderConversations()`, elle appelle la fonction `openConversation()` lors d'un clic ou de la création d'une nouvelle conversation.
-2. Finir l'implémentation de la fonction `openConversation()` :
+18. Retourner dans la fonction `renderConversations()`, elle appelle la fonction `openConversation()` lors d'un clic ou de la création d'une nouvelle conversation.
+19. Finir l'implémentation de la fonction `openConversation()` :
     - Appeler le nouveau endpoint (`fetch`) et lire son contenu JSON (`.json()`). 
     > ⚠️ Attention, ces deux méthodes sont asynchrones, elles retournent une [Promise](https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Operators/await) et il nous faut donc attendre le résultat de cette `Promise`.
     - Créer l'élément `li`, changer son contenu HTML par le `chat-tab` template et ajouter ce nouvel élément à `chatHeader` [comme enfant](https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild)
@@ -218,15 +218,15 @@ Recharger la page du navigateur, il est maintenant possible de cliquer sur les c
 
 #### Fichier `app/templates/elements/chat-conversation.html`
 
-1. Trouver le formulaire d'envoi de message (balise `<form>`)
-2. Noter le nom des champs du formulaire (`session_id` et `query`)
+20. Trouver le formulaire d'envoi de message (balise `<form>`)
+21. Noter le nom des champs du formulaire (`session_id` et `query`)
 
 #### Fichier `app/ajax.py`
 
-1. Créer un endpoint `POST` `send_message`
-2. Les champs du formulaire de `chat-conversation` seront envoyés, ils sont accessibles en python via `request.form.get('nom_du_champs')`. Vérifiez que les deux champs ne sont pas nuls, sinon retourner un [message d'erreur avec un status 400](https://www.geeksforgeeks.org/python/use-jsonify-instead-of-json-dumps-in-flask/)
-3. Utiliser la méthode `make_query` du `RagService` pour faire tourner la pipeline de RAG et faire une requête au LLM
-4. Renvoyer un JSON contenant la réponse et le contexte avec les clés `response` et `context` :
+22. Créer un endpoint `POST` `send_message`
+23. Les champs du formulaire de `chat-conversation` seront envoyés, ils sont accessibles en python via `request.form.get('nom_du_champs')`. Vérifiez que les deux champs ne sont pas nuls, sinon retourner un [message d'erreur avec un status 400](https://www.geeksforgeeks.org/python/use-jsonify-instead-of-json-dumps-in-flask/)
+24. Utiliser la méthode `make_query` du `RagService` pour faire tourner la pipeline de RAG et faire une requête au LLM
+25. Renvoyer un JSON contenant la réponse et le contexte avec les clés `response` et `context` :
     ```json
     response: LLM response
     context: Context used for rag
@@ -235,17 +235,17 @@ Recharger la page du navigateur, il est maintenant possible de cliquer sur les c
 
 #### Fichier `app/static/js/chat.js`
 
-1. Retourner dans la fonction `openConversation()`, on veut appeler la fonction `sendMessage()` lorsque le formulaire `chatForm` est envoyé (lorsqu'on envoie un message) :
+26. Retourner dans la fonction `openConversation()`, on veut appeler la fonction `sendMessage()` lorsque le formulaire `chatForm` est envoyé (lorsqu'on envoie un message) :
     - Ajouter un event listener pour l'évènement `submit` sur l'élément `chatForm`.
     - Empêcher le rechargement de la page ([événement par défaut](https://developer.mozilla.org/fr/docs/Web/API/Event/preventDefault) lors d'un submit)
     - Appeler la fonction `sendMessage()` avec le formulaire comme argument
-2. Dans la fonction `sendMessage()`, faire une requête à notre nouveau endpoint (méthode POST et le `formData` en tant que body).
-3. Créer une fonction `displayMessage()` au-dessus de `sendMessage()`, cette fonction prend un `message` et un `role` comme arguments
-4. Dans cette fonction:
+27. Dans la fonction `sendMessage()`, faire une requête à notre nouveau endpoint (méthode POST et le `formData` en tant que body).
+28. Créer une fonction `displayMessage()` au-dessus de `sendMessage()`, cette fonction prend un `message` et un `role` comme arguments
+29. Dans cette fonction:
     - [Sélectionner](https://developer.mozilla.org/fr/docs/Web/API/Document/querySelector) l'élément avec la classe **"chat-conversation"** et lui retirer la [classe](https://developer.mozilla.org/en-US/docs/Web/API/Element/classList) **"empty"**.
     - Créer un nouvel élément `li`, changer son inner HTML pour `message`, ajouter la variable `role` à sa liste de classes.
     - Sélectionner l'élément `ul` avec la classe **"messages"** et lui ajouter l'élément `li` comme enfant.
-4. Appeler cette nouvelle fonction `displayMessage()` dans `sendMessage()` pour afficher le message de l'utilisateur puis la réponse du LLM
+30. Appeler cette nouvelle fonction `displayMessage()` dans `sendMessage()` pour afficher le message de l'utilisateur puis la réponse du LLM
 
 > 💡 L'utilisation de [sélecteurs CSS](https://www.w3schools.com/jsref/met_document_queryselector.asp) vous sera utile pour retrouver les éléments du DOM depuis JS
 
@@ -257,8 +257,8 @@ Nous voulons faire apparaître une popup formulaire lors de la création d'une c
 
 #### Fichier `app/ajax.py`
 
-1. Créer un endpoint `create_session_popup` qui renvoie la template `create-session-popup.html`
-2. Créer un endpoint `POST` `create_session` qui permet de créer une session avec un nom spécifique et renvoie un JSON avec l'ID de la session créée sous la clé `session_id`.
+31. Créer un endpoint `create_session_popup` qui renvoie la template `create-session-popup.html`
+32. Créer un endpoint `POST` `create_session` qui permet de créer une session avec un nom spécifique et renvoie un JSON avec l'ID de la session créée sous la clé `session_id`.
 
 > 💡 Le formulaire de la template `create-session-popup` sera utilisé pour requêter le deuxième endpoint. Allez voir le contenu de son formulaire pour connaître le nom des champs.
 
@@ -266,19 +266,19 @@ Nous voulons faire apparaître une popup formulaire lors de la création d'une c
 
 La fonction `createConversationPopup()` implémente déjà les deux appels aux endpoints que vous venez de créer. Elle requête le HTML de la popup, l'ajoute à la page et attend que le formulaire soit envoyé pour créer une nouvelle conversation.
 
-1. [Envoyer un événement](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent) nommé `conversationCreated` une fois la session créée :
+33. [Envoyer un événement](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/CustomEvent) nommé `conversationCreated` une fois la session créée :
     - Ajouter l'ID de la session créée sous la clé `sessionId` du `detail` de l'événement
     - Activer les bubbles
     - Envoyer l'événement sur l'élément `popup`
-2. Ajouter le keyword `export` devant la fonction afin de pouvoir l'utiliser dans notre script principal
+34. Ajouter le keyword `export` devant la fonction afin de pouvoir l'utiliser dans notre script principal
 
 #### Fichier `app/static/js/chat.js`
 
-1. Importer la fonction `createConversationPopup()` au sommet du script :
+35. Importer la fonction `createConversationPopup()` au sommet du script :
 ```js
 import { createConversationPopup } from './popups.js';
 ```
-2. Dans la fonction `renderConversations()` :
+36. Dans la fonction `renderConversations()` :
     - Appeler la fonction `createConversationPopup()` au clic sur le bouton de création de conversation. 
     - Récupérer l'élément `popup` renvoyé par la fonction puis ajouter un event listener sur la popup afin de savoir quand une conversation est créée. 
     - Appeler alors `renderConversations()` et `openConversation()` avec l'ID de la nouvelle session.
@@ -298,12 +298,12 @@ La dernière étape est de permettre à l'utilisateur de cliquer sur un document
 
 #### Fichier `app/static/js/chat.js`
 
-1. Dans la fonction `openDocument()`, regarder la façon dont elle appelle le endpoint `serve_document` que nous allons devoir implémenter. Comment est passé l'ID du document à ouvrir ? Comment est-ce qu'on récupère le contenu du document (on utilise un blob) ?
+37. Dans la fonction `openDocument()`, regarder la façon dont elle appelle le endpoint `serve_document` que nous allons devoir implémenter. Comment est passé l'ID du document à ouvrir ? Comment est-ce qu'on récupère le contenu du document (on utilise un blob) ?
 
 #### Fichier `app/ajax.py`
 
-1. Créer le endpoint `serve_document`
-2. Retrouver un document depuis son ID avec `DocumentService`
-3. Renvoyer le blob du document (la fonction [send_file](http://flask.palletsprojects.com/en/stable/api/#flask.send_file) va vous être utile)
+38. Créer le endpoint `serve_document`
+39. Retrouver un document depuis son ID avec `DocumentService`
+40. Renvoyer le blob du document (la fonction [send_file](http://flask.palletsprojects.com/en/stable/api/#flask.send_file) va vous être utile)
 
 ## Fin du TD
