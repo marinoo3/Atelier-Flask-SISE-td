@@ -17,8 +17,7 @@ Ce TD bonus vous permet d'implémenter un système d'authentification complet po
 
 ## 📚 Prérequis
 
-- TD "Hello World" complété
-- Connaissance de base de Flask et SQLAlchemy
+- TDs "Hello World" et "RAGme" complétés
 - Python 3.x et `uv` installés
 
 ## 🚀 Démarrage Rapide
