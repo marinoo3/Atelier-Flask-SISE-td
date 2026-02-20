@@ -1,12 +1,11 @@
 from flask import Flask
 
-from app.database.sql_db import db
-from app.services import RagService, DocumentService
+# from app.module import object
 
 
 class AppContext(Flask):
-    rag_service: RagService
-    document_service: DocumentService
+    # my_service: MyService
+    pass
 
 
 def create_app() -> Flask:
@@ -21,10 +20,8 @@ def create_app() -> Flask:
 
     # Load configuration
     with app.app_context():
-        app.rag_service = RagService()
-        app.document_service = DocumentService()
-
-    db.init_db()
+        # app.my_service = MyService()
+        pass
 
     # Init routes pages
     from app.routes import main as main_blueprint

@@ -14,7 +14,7 @@ function renderPopup(html) {
     return popup
 }
 
-export async function createConversationPopup() {
+async function createConversationPopup() {
     // Request popup HTML to Python
     const response = await fetch('ajax/create_session_popup');
     const html = await response.text();
@@ -40,13 +40,8 @@ export async function createConversationPopup() {
         })
         const content = await response.json();
 
-        // Send event
-        popup.dispatchEvent(
-            new CustomEvent('conversationCreated', {
-                detail: { sessionId:  content.session_id},
-                bubbles: true
-            })
-        )
+        // TODO: create custom event `conversationCreated`
+        // with sessionId as detail and bubbles
 
         popup.remove();
     })
@@ -54,7 +49,7 @@ export async function createConversationPopup() {
     return popup
 }
 
-export async function createDocumentPopup() {
+async function createDocumentPopup() {
     // Request popup HTML to Python
     const response = await fetch('ajax/create_document_popup');
     const html = await response.text();
@@ -79,13 +74,8 @@ export async function createDocumentPopup() {
             body: formData
         })
 
-        // Send event
-        popup.dispatchEvent(
-            new CustomEvent('documentImported', {
-                detail: { file: formElement.elements.file.value },
-                bubbles: true
-            })
-        )
+        // TODO: create custom event `documentImported`
+        // with file (formElement.elements.file.value) as detail and bubbles
 
         popup.remove();
     })
