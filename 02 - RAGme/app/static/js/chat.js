@@ -1,5 +1,3 @@
-import { createDocumentPopup, createConversationPopup } from './popups.js';
-
 const chatSection = document.querySelector('.section#chat');
 const conversationSection = document.querySelector('.section#conversations');
 const documentSection = document.querySelector('.section#documents');
@@ -33,12 +31,7 @@ async function renderConversations() {
     // Bind create button
     const createButton = conversationSection.querySelector('button');
     createButton.addEventListener('click', () => {
-        createConversationPopup().then(popup => {
-            popup.addEventListener('conversationCreated', (event) => {
-                renderConversations();
-                openConversation(event.detail.sessionId);
-            })
-        });
+        // TODO: create popup and rerender + open session on session creation
     })
 }
 
@@ -70,7 +63,7 @@ async function renderDocuments() {
 }
 
 
-// ---------------- Manage conversations
+// ---------------- Manage documents
 
 
 async function openDocument(documentId) {
@@ -88,16 +81,15 @@ async function openDocument(documentId) {
 
 
 async function openConversation(sessionId) {
-    // Request python for a specific conversation
-    const response = await fetch(`ajax/render_session/${sessionId}`);
-    const content = await response.json();
+    // TODO: request `render_session` endpoint with the `sessionId` as URL parameter
+    // and read its json content
 
     // Render tab HTML if not there yet
     let li = openedTab[sessionId];
     if (li == undefined) {
-        li = document.createElement('li');
-        li.innerHTML = content.tab;
-        chatHeader.appendChild(li);
+
+        // TODO: create a `li` element, set its innerHTML to the `tab` value of the response content
+        // and append this new li element to the `chatHeader`
 
         li.addEventListener('click', (event) => {
             if (event.target.closest('button.close')) {
@@ -115,17 +107,15 @@ async function openConversation(sessionId) {
     chatHeader.querySelector('li.active')?.classList.remove('active');
     li.classList.add('active');
 
-    // Render conversation HTML
-    chatConv.innerHTML = content.conversation;
+    // TODO: set the `chatConv` innerHTML to the `conversation` key of the response content
+
     const input = chatConv.querySelector('input[name="query"]');
     input.focus();
 
     // Bind message sent
     const chatForm = chatConv.querySelector('form.entry');
-    chatForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        sendMessage(chatForm);
-    })
+
+    // TODO: add event listener on form submit, prevent default event and call `sendMessage` function 
 }
 
 function closeConversation(sessionId) {
@@ -134,7 +124,7 @@ function closeConversation(sessionId) {
     delete openedTab[sessionId];
     li.remove();
     
-    // Open first element from opened tab if any
+    // Render first of opened tab if any
     const firstTabID = Object.keys(openedTab)[0];
     if (firstTabID != undefined) {
         openConversation(firstTabID);
@@ -147,50 +137,22 @@ function closeConversation(sessionId) {
 // ---------------- Manage messages
 
 
-function displayMessage(message, role) {
-    // Remove 'empty' class if present
-    const currentConv = chatConv.querySelector('.chat-conversation');
-    currentConv.classList.remove('empty');
-
-    // Create message element
-    const li = document.createElement('li');
-    li.innerHTML = message;
-    li.classList.add(role);
-
-    // Render it
-    const messageList = chatConv.querySelector('ul.messages');
-    messageList.appendChild(li);
-}
-
 async function sendMessage(chatForm) {
     // Display message
     const formData = new FormData(chatForm);
-    displayMessage(formData.get('query'), 'user');
+
+    // TODO: call `displayMessage` with the user query as message and "user" as role
+    // TIPS: retrieve user query from `formData`
 
     // Clear and disable user input
     chatForm.elements.query.value = '';
     chatForm.elements.query.disabled = true;
 
-    // Send request to python
-    const response = await fetch('ajax/send_message', {
-        method: 'POST',
-        body: formData
-    });
-    const content = await response.json();
+    // TODO: request `send_message` endpoint with the `formData` as body
+    // and read the response json content
 
-    // Display response and enable user input
-    displayMessage(content.response, 'assistant');
+    // TODO: call `displayMessage` with the response content `response` value and "assistant" as role
 
     // Enable user input
     chatForm.elements.query.disabled = false;
 }
-
-
-
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Triggered when page loaded
-    renderConversations();
-    renderDocuments();
-})
