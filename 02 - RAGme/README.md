@@ -42,31 +42,38 @@ L'application est composée d'une seule page. Il s'agit du fichier `chat.html` d
 Nous avons maintenant besoin d'implémenter notre ORM afin de pouvoir exploiter la base de données et continuer l'interface.
 
 ## Création de l'ORM et configuration de la base de donnée
+
 Afin de préparer le modèle *SQLAlchemy* permettant de générer l'**O**bject **R**elational **M**apping: l'objet python permettant de mapper une classe à la table relationnelle contenant les documents.
 
 >L'ORM permet de configurer une base de donnée SQL avec grande facilité, et permettre des intéractions avec cette dernière via des objets pythons tels que nous les connaissons. Nous évitons ainsi de gérer les connecteurs et les réequêts SQL.
 
 ### Module `app.models`
+
 #### Fichier `app/models/base.py`
+
 1. Dans le fichier `base.py` déclarer l'objet de base de SQLAlchemy. (Voir la partie `01 - Hello world`). Cet objet devra être héritée par tous les modèles `SQLAlchemy` afin d'enregistrer les classes mappées et les métadonnées.
 
 #### Fichier `app/models/document.py`
-Dans le fichier `document.py`: 
+
+Dans le fichier `document.py`:
+
 2. Importez l'objet `Base` précédemment créé
-2. Créez la classe `Document`: le modèle de document de la base de donnée.
-    a. Elle doit hériter de `Base` afin d'enregistrer la classe dans l'ORM.
-    b. Nommez la table `documents`
-    c. Configurez les champs de votre table:
+3. Créez la classe `Document`: le modèle de document de la base de donnée.
+    - Elle doit hériter de `Base` afin d'enregistrer la classe dans l'ORM.
+    - Nommez la table `documents`
+    - Configurez les champs de votre table:
     ```
     id (int): Unique identifier for the document.
     title (str): Title of the document.
     binary (bytes): Binary content of the document (e.g., PDF data).
     category (Optional[str]): Optional category or type of the document.
-    url (Optional[str]): Optional URL where the document can be accessed.
+    url (Optio
+    nal[str]): Optional URL where the document can be accessed.
     ```
-    d.Veillez à bien respecter le typage, et les contraintes d'unicités. Tous les imports de typage sont préchargés pour vous, et un exemple est proposé.
+    - Veillez à bien respecter le typage, et les contraintes d'unicités. Tous les imports de typage sont préchargés pour vous, et un exemple est proposé.
     
 #### Fichier `app/models/__init__.py`
+
 Dans le fichier initialisateur du module, exposez la classe Document:
 4. Importez du fichier `document.py` la classe Document.
 5. paramétrez l'attribut `__all__` pour exposer la classe. 
@@ -84,7 +91,6 @@ Les modèles sont prêts; il faut à présent paramétrer la base de donnée ell
 
 #### Fichier `app/database/sql_db.py`
 
-
 6. Importez l'objet `Base` contenant toutes les métadonnées des modèles SQLAlchemy. 
 7. Complétez la propriété `engine`: il faut créer le moteur SQLAlchemy permettant la connection à la base de donnée locale et l'enregistrer dans l'attribut `self._engine`.
     - Utilisez une `f_string` pour insérer dynamiquement l'attribut `self.db_path` 
@@ -95,7 +101,6 @@ Les modèles sont prêts; il faut à présent paramétrer la base de donnée ell
 > 💡Besoin d'aide ? https://docs.sqlalchemy.org/en/21/orm/session_basics.html
 
 ### Module `app.schema`
-
 
 #### Fichier `app/schemas/document_schema.py`
 
@@ -108,7 +113,6 @@ L'ORM est paramétré, et la base de donnée configurée. Lors de l'interaction 
 
 > 💡Pour vous aider: https://docs.pydantic.dev/latest/#pydantic-examples
 
-
 ### Module `app.services`
 
 Il est maintenant temps d'exploiter notre entrepôt de données ! Le fichier `document_services.py` contient toute la logique CRUD de la table document de notre entrepôt.
@@ -116,18 +120,17 @@ Il est maintenant temps d'exploiter notre entrepôt de données ! Le fichier `do
 #### Fichier `app/schemas/document_schema.py`
 
 12. Implémenter la méthode `get_all()`
-    a. La méthode doit retourner une liste de tous les documents présent en base de donnée. 
-    b. Les données doivent être générées dans l'objet `DocumentSchema` pydantic (il est possible de créé l'objet pydantic attribut par attribut, mais peut être que la méthode `model_validate()` peut vous aider)
+    - La méthode doit retourner une liste de tous les documents présent en base de donnée.
+    - Les données doivent être générées dans l'objet `DocumentSchema` pydantic (il est possible de créé l'objet pydantic attribut par attribut, mais peut être que la méthode `model_validate()` peut vous aider)
     
-
-13. Implémenter la méthode `get_by_id()`
-    a. La méthode doit renvoyer un unique `DocumentSchema`
-    b. La méthode doit lever une erreur si l'id ne correspond à aucun document.
+14. Implémenter la méthode `get_by_id()`
+    - La méthode doit renvoyer un unique `DocumentSchema`
+    - La méthode doit lever une erreur si l'id ne correspond à aucun document.
     
-14. Implémenter la méthode `create()`
-    a. La méthode doit pouvoir créer une nouvelle entrée dans la table à partir d'un fichier pdf.
-    b. la méthode doit renvoyer un `DocumentSchema` représentant la nouvelle entrée après insertion.
-    c. La synchronisation avec la chroma_db (pour la recherche vectorielle) est déjà implémentée.
+16. Implémenter la méthode `create()`
+    - La méthode doit pouvoir créer une nouvelle entrée dans la table à partir d'un fichier pdf.
+    - la méthode doit renvoyer un `DocumentSchema` représentant la nouvelle entrée après insertion.
+    - La synchronisation avec la chroma_db (pour la recherche vectorielle) est déjà implémentée.
     
 ## Communication services / client
 
@@ -145,8 +148,8 @@ Avant toute chose, il nous faut instancier nos services et initialiser notre bas
 4. Importer nos deux services `RagService` et `DocumentService`
 5. Appeler la méthode `init_db` après avoir créé l'app dans la méthode `create_app()`
 6. Nous voulons instancier nos services dans le contexte de l'application Flask, pour que ceux-ci puissent être utilisés depuis l'AJAX.
-    a. Créer une instance pour chaque service dans `app.app_context()`.
-    b. Corriger le typage en définissant le type de ces instances dans la classe `AppContext`.
+    - Créer une instance pour chaque service dans `app.app_context()`.
+    - Corriger le typage en définissant le type de ces instances dans la classe `AppContext`.
     
 ### Premiers endpoints
 
