@@ -11,8 +11,5 @@ main = Blueprint('main', __name__)
 
 
 @main.route('/')
-def hello():
+def chat():
     return render_template('chat.html')
-
-
-

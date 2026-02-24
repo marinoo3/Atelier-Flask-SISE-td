@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Flask Bonus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-badge {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .btn-logout {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .btn-logout:hover {
+            background: #dc2626;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card h2 {
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            color: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background: #1e40af;
+            transform: translateY(-2px);
+        }
+        
+        .info-text {
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .alert {
+            padding: 12px 18px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background: white;
+            border: 2px solid #10b981;
+            color: #065f46;
+            font-weight: 600;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 Dashboard</h1>
+            <div class="user-info">
+                <span class="user-badge">👤 {{ session.username }}</span>
+                <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+            </div>
+        </div>
+        
+        <!-- Welcome Message -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Account Created</h3>
+                <div class="value">{{ created_at }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Email</h3>
+                <div class="value" style="font-size: 1.2rem;">{{ user.email }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>API Requests</h3>
+                <div class="value">
+                    {% set total_requests = api_keys_with_counts|sum(attribute='request_count') %}
+                    {{ total_requests }} <span style="font-size: 0.9rem; color: #64748b;">/ ∞</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- API Keys Management -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>🔑 Your API Keys</h2>
+                {% set active_keys = api_keys_with_counts|selectattr('key.is_active')|list %}
+                {% if active_keys|length == 0 %}
+                <form method="POST" action="/api-keys/generate" style="margin: 0;">
+                    <button type="submit" class="btn-primary">+ Generate API Key</button>
+                </form>
+                {% endif %}
+            </div>
+            
+            {% if api_keys_with_counts %}
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8fafc; text-align: left;">
+                                <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Key</th>
+                                <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Created</th>
+                                <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Requests</th>
+                                <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Status</th>
+                                <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in api_keys_with_counts %}
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 12px; font-family: monospace; font-size: 0.9rem;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <code style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px; flex: 1;">{{ item.key.key }}</code>
+                                        <button onclick="copyToClipboard('{{ item.key.key }}')" style="background: #e0e7ff; color: #3730a3; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                                            📋 Copy
+                                        </button>
+                                    </div>
+                                </td>
+                                <td style="padding: 12px; color: #64748b;">{{ item.key.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td style="padding: 12px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-weight: 600; color: #16a34a;">
+                                            {{ item.request_count }}
+                                        </span>
+                                        <span style="color: #64748b; font-size: 0.85rem;">
+                                            (unlimited)
+                                        </span>
+                                    </div>
+                                </td>
+                                <td style="padding: 12px;">
+                                    {% if item.key.is_active %}
+                                        <span style="background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">✓ Active</span>
+                                    {% else %}
+                                        <span style="background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">✗ Revoked</span>
+                                    {% endif %}
+                                </td>
+                                <td style="padding: 12px;">
+                                    {% if item.key.is_active %}
+                                        <form method="POST" action="/api-keys/{{ item.key.id }}/revoke" style="margin: 0;" onsubmit="return confirm('Are you sure you want to revoke this API key?');">
+                                            <button type="submit" style="background: #fee2e2; color: #991b1b; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+                                                Revoke
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span style="color: #94a3b8;">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 6px; border-left: 4px solid #3b82f6;">
+                    <p style="color: #475569; font-size: 0.9rem; line-height: 1.6;">
+                        <strong>💡 How to use:</strong> Include your API key in requests with the header 
+                        <code style="background: white; padding: 2px 6px; border-radius: 3px;">X-API-Key: your_key_here</code>
+                        or <code style="background: white; padding: 2px 6px; border-radius: 3px;">Authorization: Bearer your_key_here</code>
+                    </p>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 40px; color: #64748b;">
+                    <p style="font-size: 1.1rem; margin-bottom: 10px;">🔑 No API keys yet</p>
+                    <p>Generate your first API key to start using protected API endpoints</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Route Usage Statistics -->
+        <div class="card">
+            <h2>📊 Request Statistics by Route</h2>
+            {% if route_statistics %}
+                <div class="info-text" style="margin-bottom: 15px;">
+                    Track which API endpoints you're using the most. This helps understand your API usage patterns.
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8fafc; text-align: left;">
+                                <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Method</th>
+                                <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Endpoint</th>
+                                <th style="padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: right;">Requests</th>
+                                <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Usage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set total_requests = route_statistics|sum(attribute='count') %}
+                            {% for stat in route_statistics %}
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 12px;">
+                                    <span style="background: {% if stat.method == 'GET' %}#dbeafe{% elif stat.method == 'POST' %}#dcfce7{% elif stat.method == 'PUT' %}#fef3c7{% elif stat.method == 'DELETE' %}#fee2e2{% else %}#f1f5f9{% endif %}; color: {% if stat.method == 'GET' %}#1e40af{% elif stat.method == 'POST' %}#166534{% elif stat.method == 'PUT' %}#854d0e{% elif stat.method == 'DELETE' %}#991b1b{% else %}#475569{% endif %}; padding: 4px 10px; border-radius: 4px; font-weight: 600; font-size: 0.85rem; font-family: monospace;">
+                                        {{ stat.method }}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px; font-family: monospace; color: #475569;">
+                                    {{ stat.endpoint }}
+                                </td>
+                                <td style="padding: 12px; text-align: right; font-weight: 600; color: #16a34a;">
+                                    {{ stat.count }}
+                                </td>
+                                <td style="padding: 12px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="flex: 1; background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden; max-width: 200px;">
+                                            {% set percentage = (stat.count / total_requests * 100)|int if total_requests > 0 else 0 %}
+                                            <div style="width: {{ percentage }}%; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); height: 100%;"></div>
+                                        </div>
+                                        <span style="font-size: 0.85rem; color: #64748b; min-width: 40px;">
+                                            {{ ((stat.count / total_requests * 100)|round(1) if total_requests > 0 else 0) }}%
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 15px; padding: 12px; background: #f8fafc; border-radius: 6px; text-align: center;">
+                    <span style="color: #64748b; font-size: 0.9rem;">
+                        <strong>Total Requests:</strong> {{ total_requests }}
+                    </span>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 40px; color: #64748b;">
+                    <p style="font-size: 1.1rem; margin-bottom: 10px;">📊 No requests yet</p>
+                    <p>Start making API requests to see statistics here</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- API Test Link -->
+        <div class="card">
+            <h2>🧪 Test Your API Key</h2>
+            <div class="info-text">
+                Once you have an API key, you can test it with protected endpoints. Try the API test interface to see how it works!
+            </div>
+            <a href="/" class="btn-primary">Go to API Test Interface</a>
+        </div>
+        
+        <!-- Protected Route Example -->
+        <div class="card">
+            <h2>🔒 Protected Route Demonstration</h2>
+            <div class="info-text">
+                This dashboard is protected by the <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 3px;">@login_required</code> decorator. 
+                Only authenticated users can access this page.
+            </div>
+            <div class="info-text">
+                API routes can be protected with <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 3px;">@require_api_key</code> to require valid API keys!
+            </div>
+        </div>
+        
+        <!-- Danger Zone -->
+        <div class="card" style="border: 2px solid #dc2626;">
+            <h2 style="color: #dc2626;">⚠️ Danger Zone</h2>
+            <div class="info-text">
+                Deleting your account will permanently remove all your data, including API keys and request logs. This action cannot be undone.
+            </div>
+            <form method="POST" action="{{ url_for('main.delete_account') }}" style="margin-top: 15px;" onsubmit="return confirm('Are you sure you want to delete your account? This action is PERMANENT and CANNOT be undone!');">
+                <button type="submit" style="background: #dc2626; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.95rem;">
+                    🗑️ Delete My Account
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('API key copied to clipboard!');
+            }, function() {
+                alert('Failed to copy API key');
+            });
+        }
+    </script>
+</body>
+</html>
