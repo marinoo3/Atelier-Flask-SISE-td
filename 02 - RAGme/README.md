@@ -118,7 +118,7 @@ L'ORM est paramétré, et la base de donnée configurée. Lors de l'interaction 
 
 Il est maintenant temps d'exploiter notre entrepôt de données ! Le fichier `document_services.py` contient toute la logique CRUD de la table document de notre entrepôt.
 
-#### Fichier `app/schemas/document_service.py`
+#### Fichier `app/services/document_services.py`
 
 12. Implémenter la méthode `get_all()`
     - La méthode doit retourner une liste de tous les documents présent en base de donnée.
